@@ -1,0 +1,40 @@
+.zd-btn {
+  box-sizing: border-box;
+  outline: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 22px;
+  height: 32px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-weight: 400;
+  color: #fff;
+  background: #1677ff;
+  white-space: nowrap;
+  text-align: center;
+  cursor: pointer;
+}
+
+.zd-btn--icon-end {
+  flex-direction: row-reverse;
+}
+
+.zd-btn > span {
+  display: inline-block;
+  line-height: 1;
+}
+
+.zd-btn-icon {
+  font-size: 0;
+}
+
+.zd-btn.z-disabled {
+  pointer-events: none;
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, .25);
+  background: rgba(0, 0, 0, .04);
+}
