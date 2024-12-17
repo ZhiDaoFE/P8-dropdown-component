@@ -7,42 +7,42 @@ const Dropdown = ((document) => {
   const triggerOpsMap = {
     [TRIGGER_TYPE.HOVER]: {
       addRootTrigger: (dd) => {
-        dd.getRoot().addEventListener('mouseenter', dd._openMenu);
-        dd.getRoot().addEventListener('mouseleave', dd._closeMenu);
+        dd.getRoot().addEventListener('mouseenter', dd.openMenu);
+        dd.getRoot().addEventListener('mouseleave', dd.closeMenu);
       },
       removeRootTrigger: (dd) => {
-        dd.getRoot().removeEventListener('mouseenter', dd._openMenu);
-        dd.getRoot().removeEventListener('mouseleave', dd._closeMenu);
+        dd.getRoot().removeEventListener('mouseenter', dd.openMenu);
+        dd.getRoot().removeEventListener('mouseleave', dd.closeMenu);
       },
       addMenuTrigger: (dd) => {
-        dd._menuDom && dd._menuDom.addEventListener('mouseenter', dd._openMenu);
-        dd._menuDom && dd._menuDom.addEventListener('mouseleave', dd._closeMenu);
+        dd._menuDom && dd._menuDom.addEventListener('mouseenter', dd.openMenu);
+        dd._menuDom && dd._menuDom.addEventListener('mouseleave', dd.closeMenu);
       },
       removeMenuTrigger: (dd) => {
-        dd._menuDom && dd._menuDom.removeEventListener('mouseenter', dd._openMenu);
-        dd._menuDom && dd._menuDom.removeEventListener('mouseleave', dd._closeMenu);
+        dd._menuDom && dd._menuDom.removeEventListener('mouseenter', dd.openMenu);
+        dd._menuDom && dd._menuDom.removeEventListener('mouseleave', dd.closeMenu);
       }
     },
     [TRIGGER_TYPE.CLICK]: {
       addRootTrigger: (dd) => {
-        dd.getRoot().addEventListener('click', dd._openMenu);
-        document.addEventListener('click', dd._closeMenu);
+        dd.getRoot().addEventListener('click', dd.openMenu);
+        document.addEventListener('click', dd.closeMenu);
       },
       removeRootTrigger: (dd) => {
-        dd.getRoot().removeEventListener('click', dd._openMenu);
-        document.removeEventListener('click', dd._closeMenu);
+        dd.getRoot().removeEventListener('click', dd.openMenu);
+        document.removeEventListener('click', dd.closeMenu);
       },
       addMenuTrigger: () => {},
       removeMenuTrigger: () => {}
     },
     [TRIGGER_TYPE.CONTEXTMENU]: {
       addRootTrigger: (dd) => {
-        dd.getRoot().addEventListener('contextmenu', dd._openMenu);
-        document.addEventListener('click', dd._closeMenu);
+        dd.getRoot().addEventListener('contextmenu', dd.openMenu);
+        document.addEventListener('click', dd.closeMenu);
       },
       removeRootTrigger: (dd) => {
-        dd.getRoot().removeEventListener('contextmenu', dd._openMenu);
-        document.removeEventListener('click', dd._closeMenu);
+        dd.getRoot().removeEventListener('contextmenu', dd.openMenu);
+        document.removeEventListener('click', dd.closeMenu);
       },
       addMenuTrigger: () => {},
       removeMenuTrigger: () => {}
@@ -63,6 +63,8 @@ const Dropdown = ((document) => {
     // _hiddenTimer;
     // _triggerType;
     // _autoAdjustOverflow;
+    // _onMenuOpen;
+    // _onMenuClose;
 
     static TRIGGER_TYPE = TRIGGER_TYPE;
 
@@ -72,12 +74,14 @@ const Dropdown = ((document) => {
 
     init(props = {}) {
       this._onMenuClick = this._onMenuClick.bind(this);
-      this._openMenu = this._openMenu.bind(this);
-      this._closeMenu = this._closeMenu.bind(this);
+      this.openMenu = this.openMenu.bind(this);
+      this.closeMenu = this.closeMenu.bind(this);
 
-      const { menu, trigger, autoAdjustOverflow } = props;
+      const { menu, trigger, autoAdjustOverflow, onMenuOpen = () => {}, onMenuClose = () => {} } = props;
 
       this._autoAdjustOverflow = !!autoAdjustOverflow;
+      this._onMenuOpen = onMenuOpen;
+      this._onMenuClose = onMenuClose;
       this.setTriggerType(trigger).setMenu(menu);
     }
 
@@ -156,7 +160,7 @@ const Dropdown = ((document) => {
         }
       }
 
-      this._closeMenu();
+      this.closeMenu();
     }
 
     _getMenuPosition() {
@@ -183,7 +187,7 @@ const Dropdown = ((document) => {
       }
     }
 
-    _openMenu(e) {
+    openMenu(e) {
       e.stopPropagation();
       e.preventDefault();
 
@@ -198,16 +202,18 @@ const Dropdown = ((document) => {
         this._menuDom.style.top = `${pos.top}px`;
         this._menuDom.style.left = `${pos.left}px`;
         this._menuDom.classList.remove(menuHiddenCls);
+        this._onMenuOpen();
       }
 
       return this;
     }
 
-    _closeMenu() {
+    closeMenu() {
       if (this._menuDom) {
         this._hiddenTimer = setTimeout(() => {
           this._menuDom.classList.add(menuHiddenCls);
           this._hiddenTimer = null;
+          this._onMenuClose();
         }, HIDDEN_DELAY);
       }
 
@@ -223,8 +229,8 @@ const Dropdown = ((document) => {
         document.body.removeChild(this._menuDom);
       }
 
-      this.getRoot().removeEventListener('mouseenter', this._openMenu);
-      this.getRoot().removeEventListener('mouseleave', this._closeMenu);
+      this.getRoot().removeEventListener('mouseenter', this.openMenu);
+      this.getRoot().removeEventListener('mouseleave', this.closeMenu);
 
       return this;
     }
